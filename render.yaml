@@ -1,0 +1,29 @@
+# render.yaml
+# This file tells Render how to build and run your application.
+# It defines the services, build commands, and environment variables.
+
+services:
+  # A PostgreSQL database instance
+  - type: pserv
+    name: telegram-dating-bot-db
+    plan: free # Or your preferred plan
+    postgres:
+      version: 14
+
+  # The Python bot worker
+  - type: worker
+    name: telegram-dating-bot
+    plan: free # Or your preferred plan
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python main.py"
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: telegram-dating-bot-db
+          property: connectionString
+      - key: TELEGRAM_TOKEN
+        sync: false # Set this in the Render dashboard
+      - key: ADMIN_USER_IDS
+        sync: false # Set this in the Render dashboard (e.g., "12345678,87654321")
